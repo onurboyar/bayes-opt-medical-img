@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import os
 
 from bayesmed.utils.model_utils import *
 from bayesmed.models.unet import UNet
@@ -9,7 +10,7 @@ from bayesmed.utils.loaders import get_dataloaders
 from bayesmed.utils.model_utils import dice_loss
 from bayesmed.models.eval import evaluate
 
-def train_unet(epochs=15, initial_lr = 0.001, scheduler = False, s_gamma = 0.1, s_step = 5, **params):
+def train_unet(epochs, batch_size, train_dir, eval_dir, initial_lr, scheduler, s_gamma, s_step, **params):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = UNet(n_channels=1, n_classes=2, bilinear=True).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr = initial_lr) #default lr is 0.001
@@ -32,7 +33,14 @@ def train_unet(epochs=15, initial_lr = 0.001, scheduler = False, s_gamma = 0.1, 
         params["shift_y"] = discrete_shift(params["shift_y"])
 
     transform = get_augmentations(**params)
-    train_dataloader, test_dataloader = get_dataloaders(transform)
+
+    paths_ = []
+    paths_.append(os.path.join(train_dir, "images"))
+    paths_.append(os.path.join(train_dir, "labels"))
+    paths_.append(os.path.join(eval_dir, "images"))
+    paths_.append(os.path.join(eval_dir, "labels"))
+    
+    train_dataloader, test_dataloader = get_dataloaders(transform, paths_, batch_size)
     best_dice = 0
     total = len(train_dataloader) * epochs
 

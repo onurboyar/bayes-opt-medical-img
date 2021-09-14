@@ -13,7 +13,9 @@ def main(args):
         initial_lr = args.initial_lr,
         scheduler = args.scheduler,
         s_gamma = args.scheduler_gamma,
-        s_step = args.scheduler_step
+        s_step = args.scheduler_step,
+        train_dir = args.training_datapath,
+        eval_dir = args.eval_datapath,
     )
 
     pbounds = {
@@ -40,6 +42,19 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    
+    parser.add_argument("--training_datapath",
+                        "-td",
+                        help="directory for training data",
+                        type = str
+    )
+
+    parser.add_argument("--eval_datapath",
+                        "-ed",
+                        help="directory for test data",
+                        type = str
+    )
+    
     parser.add_argument("--batch_size",
                         "-bs",
                         help="batch size for both training and evaluating",
