@@ -9,11 +9,18 @@ from bayesmed.utils.loaders import get_dataloaders
 from bayesmed.utils.model_utils import dice_loss
 from bayesmed.models.eval import evaluate
 
-def train_unet(epochs=15, initial_lr = 0.001, scheduler = None, **params):
+def train_unet(epochs=15, initial_lr = 0.001, scheduler = False, s_gamma = 0.1, s_step = 5, **params):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     model = UNet(n_channels=1, n_classes=2, bilinear=True).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr = initial_lr) #default lr is 0.001
     criterion = nn.CrossEntropyLoss()
+
+    if scheduler:
+        scheduler_fn = torch.optim.lr_scheduler.StepLR(
+            optimizer,
+            step_size = s_step,
+            gamma = s_gamma
+        )
  
     if "angle" in params.keys():
         params["angle"] = discrete_angle_normalized(params["angle"])
@@ -54,7 +61,7 @@ def train_unet(epochs=15, initial_lr = 0.001, scheduler = None, **params):
             if val_score.item() > best_dice:
                 best_dice = val_score.item()
 
-            if scheduler != None:
-                scheduler.step()
+            if scheduler:
+                scheduler_fn.step()
 
     return best_dice
