@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import os
 
 from bayesmed.utils.model_utils import *
