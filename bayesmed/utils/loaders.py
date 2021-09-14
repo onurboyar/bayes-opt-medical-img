@@ -11,7 +11,7 @@ from os.path import splitext
 from pathlib import Path
 
 
-class DRIVEDataset(Dataset):
+class SegmentationDataset(Dataset):
     def __init__(self, images_dir: str, masks_dir: str, scale: float = 1.0, mask_suffix: str = '', transform = None):
         self.images_dir = Path(images_dir)
         self.masks_dir = Path(masks_dir)
@@ -87,3 +87,18 @@ class DRIVEDataset(Dataset):
             'mask': torch.as_tensor(mask.copy()).long().contiguous(),
             'filename': str(mask_file[0]).split("/")[-1]
         }
+
+
+def get_dataloaders(transform, paths, batch_size):
+    dir_img = Path(paths[0])
+    dir_mask = Path(paths[1])
+
+    test_dir_img = Path(paths[2])
+    test_dir_mask = Path(paths[3])
+
+    dataset = SegmentationDataset(dir_img, dir_mask, 1., transform=transform)
+    test_dataset = SegmentationDataset(test_dir_img, test_dir_mask, 1.)
+
+    train_dataloader = DataLoader(dataset, shuffle=True, batch_size = batch_size)
+    test_dataloader = DataLoader(test_dataset, shuffle=False, batch_size = batch_size)
+    return train_dataloader, test_dataloader
