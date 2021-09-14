@@ -4,6 +4,7 @@ import torch
 
 from bayes_opt import BayesianOptimization
 from bayesmed.models.trainer import train_unet
+from pbounds import p_bounds
 
 def main(args):
     f = functools.partial(
@@ -18,17 +19,9 @@ def main(args):
         eval_dir = args.eval_datapath,
     )
 
-    pbounds = {
-        'angle': (0,2), 
-        'shift_x': (-1,1), 
-        'shift_y': (-1,1),
-        'zoom_amount': (0.5,0.9),
-        'gamma': (0.5,1.5)
-    }
-
     optimizer = BayesianOptimization(
         f = f,
-        pbounds = pbounds,
+        pbounds = p_bounds,
         random_state = 1,
     )
 
@@ -36,8 +29,6 @@ def main(args):
         init_points = args.bo_init_points,
         n_iter = args.bo_n_iter,
     )
-
-    
 
 
 if __name__ == "__main__":
